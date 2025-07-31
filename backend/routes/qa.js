@@ -13,6 +13,7 @@ router.get('/:id', qaController.getQAById);
 router.post('/', authenticateToken, validateQACreation, qaController.askQuestion);
 router.put('/:id', authenticateToken, qaController.updateQA);
 router.delete('/:id', authenticateToken, qaController.deleteQA);
-router.post('/:id/answer', authenticateToken, isOrganizer, qaController.answerQuestion);
+router.put('/:id/answer', authenticateToken, isOrganizer, qaController.answerQuestion);
+router.post('/:id/upvote', authenticateToken, qaController.upvoteQuestion);
 
 module.exports = router; 

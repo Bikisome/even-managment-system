@@ -63,18 +63,29 @@ const validateEventCreation = [
     .isISO8601()
     .withMessage('Please provide a valid date'),
   body('time')
-    .matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
-    .withMessage('Please provide a valid time in HH:MM format'),
+    .optional()
+    .matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
+    .withMessage('Please provide a valid time in HH:MM:SS format'),
   body('location')
     .trim()
     .isLength({ min: 3, max: 200 })
     .withMessage('Location must be between 3 and 200 characters'),
   body('category')
-    .isIn(['conference', 'workshop', 'seminar', 'concert', 'sports', 'other'])
+    .isIn(['conference', 'workshop', 'seminar', 'concert', 'sports', 'technology', 'business', 'other'])
     .withMessage('Please select a valid category'),
   body('privacy')
+    .optional()
     .isIn(['public', 'private', 'invite-only'])
-    .withMessage('Please select a valid privacy setting'),
+    .withMessage('Please select a valid privacy setting')
+    .default('public'),
+  body('maxAttendees')
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage('Maximum attendees must be a positive integer'),
+  body('price')
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage('Price must be a positive number'),
   handleValidationErrors
 ];
 
@@ -170,10 +181,6 @@ const validateForumPost = [
   body('eventId')
     .isInt()
     .withMessage('Event ID must be a valid integer'),
-  body('title')
-    .trim()
-    .isLength({ min: 5, max: 100 })
-    .withMessage('Post title must be between 5 and 100 characters'),
   body('content')
     .trim()
     .isLength({ min: 10, max: 1000 })

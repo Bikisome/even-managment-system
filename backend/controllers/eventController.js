@@ -247,13 +247,21 @@ const getEventById = async (req, res) => {
     const event = await Event.findByPk(id, {
       include: [
         {
-          model: User,
-          as: 'organizer',
-          attributes: ['id', 'name', 'email']
-        },
-        {
           model: Ticket,
-          attributes: ['id', 'name', 'description', 'price', 'quantity', 'type']
+          as: 'tickets',
+          include: [
+            {
+              model: Attendee,
+              as: 'attendees',
+              include: [
+                {
+                  model: User,
+                  as: 'user',
+                  attributes: ['id', 'name', 'email']
+                }
+              ]
+            }
+          ]
         }
       ]
     });
@@ -483,11 +491,13 @@ const getEventAttendees = async (req, res) => {
       include: [
         {
           model: User,
+          as: 'user',
           attributes: ['id', 'name', 'email']
         },
         {
           model: Ticket,
-          attributes: ['name', 'type', 'price']
+          as: 'ticket',
+          attributes: ['type', 'price']
         }
       ]
     });
@@ -521,16 +531,23 @@ const getEventAttendees = async (req, res) => {
  */
 const getMyEvents = async (req, res) => {
   try {
+
+    const  organizerId= req.user.id;
+
+    console.log("organizerId:", organizerId);
     const events = await Event.findAll({
       where: { organizerId: req.user.id },
       include: [
         {
           model: Ticket,
-          attributes: ['id', 'name', 'price', 'quantity', 'type']
+          as: 'tickets',
+          attributes: ['id', 'type', 'price', 'quantity']
         }
       ],
       order: [['date', 'ASC']]
     });
+
+    console.log("Events:", events);
 
     res.json({
       message: 'Your events retrieved successfully',

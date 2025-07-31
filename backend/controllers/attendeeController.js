@@ -78,7 +78,7 @@ const registerForEvent = async (req, res) => {
     }
 
     // Check ticket availability
-    const soldTickets = await Attendee.sum('quantity', {
+    const soldTickets = await Attendee.count({
       where: { ticketId }
     }) || 0;
     
@@ -90,27 +90,28 @@ const registerForEvent = async (req, res) => {
       });
     }
 
-    // Create registration
-    const registration = await Attendee.create({
-      eventId,
-      ticketId,
-      userId: req.user.id,
-      quantity,
-      totalAmount: ticket.price * quantity,
-      status: 'confirmed'
-    });
+    // Create registration(s) - one record per ticket
+    const registrations = [];
+    for (let i = 0; i < quantity; i++) {
+      const registration = await Attendee.create({
+        eventId,
+        ticketId,
+        userId: req.user.id,
+        status: 'confirmed'
+      });
+      registrations.push(registration);
+    }
 
     res.status(201).json({
       message: 'Registration successful',
-      registration: {
-        id: registration.id,
-        eventId: registration.eventId,
-        ticketId: registration.ticketId,
-        quantity: registration.quantity,
-        totalAmount: registration.totalAmount,
-        status: registration.status,
-        createdAt: registration.createdAt
-      }
+      registrations: registrations.map(reg => ({
+        id: reg.id,
+        eventId: reg.eventId,
+        ticketId: reg.ticketId,
+        status: reg.status,
+        createdAt: reg.createdAt
+      })),
+      totalTickets: quantity
     });
   } catch (error) {
     console.error('Register for event error:', error);
@@ -142,11 +143,13 @@ const getMyRegistrations = async (req, res) => {
       include: [
         {
           model: Event,
+          as: 'event',
           attributes: ['id', 'title', 'date', 'time', 'location', 'category']
         },
         {
           model: Ticket,
-          attributes: ['name', 'type', 'price']
+          as: 'ticket',
+          attributes: ['type', 'price']
         }
       ],
       order: [['createdAt', 'DESC']]
@@ -198,14 +201,17 @@ const getRegistrationById = async (req, res) => {
       include: [
         {
           model: Event,
+          as: 'event',
           attributes: ['id', 'title', 'date', 'time', 'location', 'category']
         },
         {
           model: Ticket,
-          attributes: ['name', 'type', 'price']
+          as: 'ticket',
+          attributes: ['type', 'price']
         },
         {
           model: User,
+          as: 'user',
           attributes: ['id', 'name', 'email']
         }
       ]
@@ -286,7 +292,7 @@ const updateRegistration = async (req, res) => {
     const { quantity, status } = req.body;
 
     const registration = await Attendee.findByPk(id, {
-      include: [{ model: Ticket }]
+      include: [{ model: Ticket, as: 'ticket' }]
     });
 
     if (!registration) {
@@ -310,7 +316,7 @@ const updateRegistration = async (req, res) => {
         where: { ticketId: registration.ticketId }
       }) || 0;
       
-      const availableTickets = registration.Ticket.quantity - soldTickets + registration.quantity;
+      const availableTickets = registration.ticket.quantity - soldTickets + registration.quantity;
       if (quantity > availableTickets) {
         return res.status(409).json({
           error: 'Insufficient tickets',
@@ -319,7 +325,7 @@ const updateRegistration = async (req, res) => {
       }
 
       // Update total amount
-      req.body.totalAmount = registration.Ticket.price * quantity;
+      req.body.totalAmount = registration.ticket.price * quantity;
     }
 
     await registration.update(req.body);
@@ -449,11 +455,13 @@ const getEventAttendees = async (req, res) => {
       include: [
         {
           model: User,
+          as: 'user',
           attributes: ['id', 'name', 'email']
         },
         {
           model: Ticket,
-          attributes: ['name', 'type', 'price']
+          as: 'ticket',
+          attributes: ['type', 'price']
         }
       ],
       order: [['createdAt', 'ASC']]

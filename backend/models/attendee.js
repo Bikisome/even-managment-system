@@ -33,7 +33,13 @@ module.exports = (sequelize, DataTypes) => {
     userId: DataTypes.INTEGER,
     eventId: DataTypes.INTEGER,
     ticketId: DataTypes.INTEGER,
-    status: DataTypes.STRING
+    quantity: DataTypes.INTEGER,
+    totalAmount: DataTypes.DECIMAL(10, 2),
+    status: DataTypes.STRING,
+    paymentMethod: DataTypes.STRING,
+    paymentId: DataTypes.STRING,
+    refundReason: DataTypes.TEXT,
+    refundedAt: DataTypes.DATE
   }, {
     sequelize,
     modelName: 'Attendee',

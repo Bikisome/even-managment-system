@@ -15,10 +15,17 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'eventId',
         as: 'event'
       });
+
+      // Poll belongs to User (creator)
+      Poll.belongsTo(models.User, {
+        foreignKey: 'userId',
+        as: 'creator'
+      });
     }
   }
   Poll.init({
     eventId: DataTypes.INTEGER,
+    userId: DataTypes.INTEGER,
     question: DataTypes.STRING,
     options: DataTypes.TEXT,
     votes: DataTypes.TEXT

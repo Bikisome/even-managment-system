@@ -13,21 +13,31 @@ module.exports = (sequelize, DataTypes) => {
       // QA belongs to Event
       QA.belongsTo(models.Event, {
         foreignKey: 'eventId',
-        as: 'Event'
+        as: 'event'
       });
 
-      // QA belongs to User
+      // QA belongs to User (questioner)
       QA.belongsTo(models.User, {
         foreignKey: 'userId',
-        as: 'user'
+        as: 'questioner'
+      });
+
+      // QA belongs to User (answerer)
+      QA.belongsTo(models.User, {
+        foreignKey: 'answererId',
+        as: 'answerer'
       });
     }
   }
   QA.init({
     eventId: DataTypes.INTEGER,
     userId: DataTypes.INTEGER,
+    answererId: DataTypes.INTEGER,
     question: DataTypes.TEXT,
-    answer: DataTypes.TEXT
+    answer: DataTypes.TEXT,
+    status: DataTypes.STRING,
+    answeredAt: DataTypes.DATE,
+    upvotes: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'QA',

@@ -7,6 +7,7 @@ const { validatePollCreation } = require('../middlewares/validation');
 // Public routes
 router.get('/event/:eventId', pollController.getEventPolls);
 router.get('/:id', pollController.getPollById);
+router.get('/:id/results', pollController.getPollResults);
 
 // Protected routes
 router.post('/', authenticateToken, isOrganizer, validatePollCreation, pollController.createPoll);

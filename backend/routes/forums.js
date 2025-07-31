@@ -9,6 +9,7 @@ router.get('/event/:eventId', forumController.getEventForumPosts);
 
 // Protected routes - specific routes first
 router.get('/my-posts', authenticateToken, forumController.getMyForumPosts);
+router.post('/:id/reply', authenticateToken, validateForumPost, forumController.createReply);
 router.get('/:id', forumController.getForumPostById);
 router.post('/', authenticateToken, validateForumPost, forumController.createForumPost);
 router.put('/:id', authenticateToken, forumController.updateForumPost);

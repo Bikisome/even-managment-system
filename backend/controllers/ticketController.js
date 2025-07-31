@@ -171,6 +171,7 @@ const getTicketById = async (req, res) => {
       include: [
         {
           model: Event,
+          as: 'event',
           attributes: ['id', 'title', 'date', 'time', 'location']
         }
       ]
@@ -245,7 +246,7 @@ const updateTicket = async (req, res) => {
   try {
     const { id } = req.params;
     const ticket = await Ticket.findByPk(id, {
-      include: [{ model: Event }]
+      include: [{ model: Event, as: 'event' }]
     });
 
     if (!ticket) {
@@ -256,7 +257,7 @@ const updateTicket = async (req, res) => {
     }
 
     // Check if user can update this ticket
-    if (ticket.Event.organizerId !== req.user.id && req.user.role !== 'admin') {
+    if (ticket.event.organizerId !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({
         error: 'Access denied',
         message: 'You can only update tickets for your own events'
@@ -307,7 +308,7 @@ const deleteTicket = async (req, res) => {
   try {
     const { id } = req.params;
     const ticket = await Ticket.findByPk(id, {
-      include: [{ model: Event }]
+      include: [{ model: Event, as: 'event' }]
     });
 
     if (!ticket) {
@@ -318,7 +319,7 @@ const deleteTicket = async (req, res) => {
     }
 
     // Check if user can delete this ticket
-    if (ticket.Event.organizerId !== req.user.id && req.user.role !== 'admin') {
+    if (ticket.event.organizerId !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({
         error: 'Access denied',
         message: 'You can only delete tickets for your own events'

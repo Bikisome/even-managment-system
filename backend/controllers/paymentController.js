@@ -198,7 +198,7 @@ const processRefund = async (req, res) => {
     const { reason } = req.body;
 
     const registration = await Attendee.findByPk(registrationId, {
-      include: [{ model: Event }]
+      include: [{ model: Event, as: 'event' }]
     });
 
     if (!registration) {
@@ -309,10 +309,12 @@ const getPaymentHistory = async (req, res) => {
       include: [
         {
           model: Event,
+          as: 'event',
           attributes: ['id', 'title', 'date']
         },
         {
           model: Ticket,
+          as: 'ticket',
           attributes: ['name', 'type', 'price']
         }
       ],
@@ -375,10 +377,12 @@ const getPaymentDetails = async (req, res) => {
       include: [
         {
           model: Event,
+          as: 'event',
           attributes: ['id', 'title', 'date', 'time', 'location']
         },
         {
           model: Ticket,
+          as: 'ticket',
           attributes: ['name', 'type', 'price']
         }
       ]
@@ -403,8 +407,8 @@ const getPaymentDetails = async (req, res) => {
       message: 'Payment details retrieved successfully',
       payment: {
         id: registration.id,
-        event: registration.Event,
-        ticket: registration.Ticket,
+        event: registration.event,
+        ticket: registration.ticket,
         quantity: registration.quantity,
         totalAmount: registration.totalAmount,
         status: registration.status,

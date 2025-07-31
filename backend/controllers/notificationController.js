@@ -74,6 +74,22 @@ const createNotification = async (req, res) => {
     // Create notifications for target users
     const notifications = [];
     if (targetUsers && targetUsers.length > 0) {
+      // Validate that all target users exist
+      const existingUsers = await User.findAll({
+        where: { id: targetUsers },
+        attributes: ['id']
+      });
+      
+      const existingUserIds = existingUsers.map(user => user.id);
+      const invalidUserIds = targetUsers.filter(id => !existingUserIds.includes(id));
+      
+      if (invalidUserIds.length > 0) {
+        return res.status(400).json({
+          error: 'Invalid user IDs',
+          message: `The following user IDs do not exist: ${invalidUserIds.join(', ')}`
+        });
+      }
+
       for (const userId of targetUsers) {
         const notification = await Notification.create({
           eventId,
@@ -169,6 +185,7 @@ const getMyNotifications = async (req, res) => {
       include: [
         {
           model: Event,
+          as: 'event',
           attributes: ['id', 'title', 'date']
         }
       ],
@@ -231,6 +248,7 @@ const getNotificationById = async (req, res) => {
       include: [
         {
           model: Event,
+          as: 'event',
           attributes: ['id', 'title', 'date']
         }
       ]

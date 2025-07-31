@@ -16,15 +16,11 @@ const { Forum, Event, User } = require('../models');
  *             type: object
  *             required:
  *               - eventId
- *               - title
  *               - content
  *             properties:
  *               eventId:
  *                 type: integer
  *                 description: Event ID
- *               title:
- *                 type: string
- *                 description: Post title
  *               content:
  *                 type: string
  *                 description: Post content
@@ -40,7 +36,7 @@ const { Forum, Event, User } = require('../models');
  */
 const createForumPost = async (req, res) => {
   try {
-    const { eventId, title, content } = req.body;
+    const { eventId, content } = req.body;
 
     // Check if event exists
     const event = await Event.findByPk(eventId);
@@ -54,7 +50,6 @@ const createForumPost = async (req, res) => {
     const forumPost = await Forum.create({
       eventId,
       userId: req.user.id,
-      title,
       content
     });
 
@@ -123,6 +118,7 @@ const getEventForumPosts = async (req, res) => {
       include: [
         {
           model: User,
+          as: 'user',
           attributes: ['id', 'name']
         }
       ],
@@ -179,10 +175,12 @@ const getForumPostById = async (req, res) => {
       include: [
         {
           model: User,
+          as: 'user',
           attributes: ['id', 'name']
         },
         {
           model: Event,
+          as: 'event',
           attributes: ['id', 'title', 'date']
         }
       ]
@@ -230,8 +228,6 @@ const getForumPostById = async (req, res) => {
  *           schema:
  *             type: object
  *             properties:
- *               title:
- *                 type: string
  *               content:
  *                 type: string
  *     responses:
@@ -249,7 +245,7 @@ const getForumPostById = async (req, res) => {
 const updateForumPost = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, content } = req.body;
+    const { content } = req.body;
 
     const forumPost = await Forum.findByPk(id);
 
@@ -268,7 +264,7 @@ const updateForumPost = async (req, res) => {
       });
     }
 
-    await forumPost.update({ title, content });
+    await forumPost.update({ content });
 
     res.json({
       message: 'Forum post updated successfully',
@@ -364,6 +360,7 @@ const getMyForumPosts = async (req, res) => {
       include: [
         {
           model: Event,
+          as: 'event',
           attributes: ['id', 'title', 'date']
         }
       ],
@@ -383,11 +380,90 @@ const getMyForumPosts = async (req, res) => {
   }
 };
 
+/**
+ * @swagger
+ * /forums/{id}/reply:
+ *   post:
+ *     summary: Reply to a forum post
+ *     tags: [Forums]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Parent forum post ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - content
+ *             properties:
+ *               content:
+ *                 type: string
+ *                 description: Reply content
+ *     responses:
+ *       201:
+ *         description: Reply created successfully
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Parent post not found
+ */
+const createReply = async (req, res) => {
+  try {
+    const { id: parentId } = req.params;
+    const { content } = req.body;
+
+    // Check if parent post exists
+    const parentPost = await Forum.findByPk(parentId);
+    if (!parentPost) {
+      return res.status(404).json({
+        error: 'Parent post not found',
+        message: 'The forum post you are trying to reply to does not exist'
+      });
+    }
+
+    // Create reply with same eventId as parent
+    // Note: This assumes you will add parentId to the Forum model
+    const reply = await Forum.create({
+      eventId: parentPost.eventId,
+      userId: req.user.id,
+      content,
+      parentId: parentId
+    });
+
+    res.status(201).json({
+      message: 'Reply created successfully',
+      reply: {
+        id: reply.id,
+        content: reply.content,
+        parentId: reply.parentId,
+        createdAt: reply.createdAt
+      }
+    });
+  } catch (error) {
+    console.error('Create reply error:', error);
+    res.status(500).json({
+      error: 'Failed to create reply',
+      message: 'An error occurred while creating the reply'
+    });
+  }
+};
+
 module.exports = {
   createForumPost,
   getEventForumPosts,
   getForumPostById,
   updateForumPost,
   deleteForumPost,
-  getMyForumPosts
+  getMyForumPosts,
+  createReply
 }; 

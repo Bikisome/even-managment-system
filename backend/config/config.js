@@ -1,19 +1,11 @@
 require('dotenv').config({ path: '.env' });
 
 module.exports = {
-  development: {
-    dialect: 'sqlite',
-    storage: './database.sqlite',
-    logging: false
-  },
-  test: {
-    dialect: 'sqlite',
-    storage: './test-database.sqlite',
-    logging: false
-  },
-  production: {
-    dialect: 'sqlite',
-    storage: './production-database.sqlite',
-    logging: false
-  },
+  dialect: 'mysql',
+  host: 'localhost',
+  port: 3306,
+  username: 'root', 
+  password: '#Nishu@0523',
+  database: 'event_management_dev',
+  logging: false,
 }; 

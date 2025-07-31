@@ -134,7 +134,7 @@ const EventDetail = () => {
             <Calendar className="mx-auto h-8 w-8 text-primary-600 mb-2" />
             <p className="text-sm text-gray-600">Date</p>
             <p className="text-lg font-semibold text-gray-900">
-              {format(new Date(event.date), 'MMM dd, yyyy')}
+              {/* {format(new Date(event?.date), 'MMM dd, yyyy')} */}
             </p>
           </div>
         </div>
@@ -142,21 +142,21 @@ const EventDetail = () => {
           <div className="card-body text-center">
             <Clock className="mx-auto h-8 w-8 text-green-600 mb-2" />
             <p className="text-sm text-gray-600">Time</p>
-            <p className="text-lg font-semibold text-gray-900">{event.time}</p>
+            <p className="text-lg font-semibold text-gray-900">{event?.time}</p>
           </div>
         </div>
         <div className="card">
           <div className="card-body text-center">
             <MapPin className="mx-auto h-8 w-8 text-blue-600 mb-2" />
             <p className="text-sm text-gray-600">Location</p>
-            <p className="text-lg font-semibold text-gray-900">{event.location}</p>
+            <p className="text-lg font-semibold text-gray-900">{event?.location}</p>
           </div>
         </div>
         <div className="card">
           <div className="card-body text-center">
             <Users className="mx-auto h-8 w-8 text-purple-600 mb-2" />
             <p className="text-sm text-gray-600">Category</p>
-            <p className="text-lg font-semibold text-gray-900">{event.category}</p>
+            <p className="text-lg font-semibold text-gray-900">{event?.category}</p>
           </div>
         </div>
       </div>
@@ -165,7 +165,7 @@ const EventDetail = () => {
       <div className="card">
         <div className="card-header">
           <nav className="flex space-x-8">
-            {tabs.map((tab) => (
+            {tabs?.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
@@ -176,7 +176,7 @@ const EventDetail = () => {
                 }`}
               >
                 <tab.icon className="h-4 w-4" />
-                <span>{tab.name}</span>
+                <span>{tab?.name}</span>
               </button>
             ))}
           </nav>
@@ -187,7 +187,7 @@ const EventDetail = () => {
             <div className="space-y-6">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Event Details</h3>
-                <p className="text-gray-600">{event.description}</p>
+                <p className="text-gray-600">{event?.description}</p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -195,21 +195,21 @@ const EventDetail = () => {
                   <dl className="space-y-2">
                     <div className="flex justify-between">
                       <dt className="text-sm text-gray-600">Category:</dt>
-                      <dd className="text-sm text-gray-900">{event.category}</dd>
+                      <dd className="text-sm text-gray-900">{event?.category}</dd>
                     </div>
                     <div className="flex justify-between">
                       <dt className="text-sm text-gray-600">Privacy:</dt>
-                      <dd className="text-sm text-gray-900">{event.privacy}</dd>
+                      <dd className="text-sm text-gray-900">{event?.privacy}</dd>
                     </div>
                     <div className="flex justify-between">
                       <dt className="text-sm text-gray-600">Status:</dt>
                       <dd className="text-sm text-gray-900">
                         <span className={`badge ${
-                          new Date(event.date) > new Date() 
+                          new Date(event?.date) > new Date() 
                             ? 'badge-success' 
                             : 'badge-warning'
                         }`}>
-                          {new Date(event.date) > new Date() ? 'Upcoming' : 'Past'}
+                          {new Date(event?.date) > new Date() ? 'Upcoming' : 'Past'}
                         </span>
                       </dd>
                     </div>
@@ -306,7 +306,7 @@ const EventDetail = () => {
                             {attendee.email}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {format(new Date(attendee.createdAt), 'MMM dd, yyyy')}
+                            {format(new Date(attendee?.createdAt), 'MMM dd, yyyy')}
                           </td>
                         </tr>
                       ))}

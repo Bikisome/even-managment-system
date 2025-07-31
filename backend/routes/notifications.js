@@ -4,7 +4,7 @@ const notificationController = require('../controllers/notificationController');
 const { authenticateToken, isOrganizer } = require('../middlewares/auth');
 
 // Protected routes - specific routes first
-router.post('/', authenticateToken, isOrganizer, notificationController.createNotification);
+router.post('/create', authenticateToken, isOrganizer, notificationController.createNotification);
 router.get('/', authenticateToken, notificationController.getMyNotifications);
 router.get('/unread-count', authenticateToken, notificationController.getUnreadCount);
 router.put('/read-all', authenticateToken, notificationController.markAllAsRead);

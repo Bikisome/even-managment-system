@@ -202,6 +202,7 @@ const getQAById = async (req, res) => {
         },
         {
           model: Event,
+          as: 'event',
           attributes: ['id', 'title', 'date']
         }
       ]
@@ -272,7 +273,7 @@ const answerQuestion = async (req, res) => {
     const { answer } = req.body;
 
     const qa = await QA.findByPk(id, {
-      include: [{ model: Event }]
+      include: [{ model: Event, as: 'event' }]
     });
 
     if (!qa) {
@@ -283,7 +284,7 @@ const answerQuestion = async (req, res) => {
     }
 
     // Check if user is the organizer or admin
-    if (qa.Event.organizerId !== req.user.id && req.user.role !== 'admin') {
+    if (qa.event.organizerId !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({
         error: 'Access denied',
         message: 'Only event organizers can answer questions'
@@ -467,6 +468,7 @@ const getMyQuestions = async (req, res) => {
       include: [
         {
           model: Event,
+          as: 'event',
           attributes: ['id', 'title', 'date']
         },
         {
@@ -491,6 +493,59 @@ const getMyQuestions = async (req, res) => {
   }
 };
 
+/**
+ * @swagger
+ * /qa/{id}/upvote:
+ *   post:
+ *     summary: Upvote a question
+ *     tags: [Q&A]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Q&A ID
+ *     responses:
+ *       200:
+ *         description: Question upvoted successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Q&A not found
+ */
+const upvoteQuestion = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const qa = await QA.findByPk(id);
+
+    if (!qa) {
+      return res.status(404).json({
+        error: 'Q&A not found',
+        message: 'The specified Q&A does not exist'
+      });
+    }
+
+    // Increment upvotes
+    const currentUpvotes = qa.upvotes || 0;
+    await qa.update({ upvotes: currentUpvotes + 1 });
+
+    res.json({
+      message: 'Question upvoted successfully',
+      upvotes: qa.upvotes
+    });
+  } catch (error) {
+    console.error('Upvote question error:', error);
+    res.status(500).json({
+      error: 'Failed to upvote question',
+      message: 'An error occurred while upvoting the question'
+    });
+  }
+};
+
 module.exports = {
   askQuestion,
   getEventQA,
@@ -498,5 +553,6 @@ module.exports = {
   answerQuestion,
   updateQA,
   deleteQA,
-  getMyQuestions
+  getMyQuestions,
+  upvoteQuestion
 }; 

@@ -1,38 +1,38 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { eventsAPI } from '../services/api';
-import { 
-  Search, 
-  Filter, 
-  Calendar, 
-  MapPin, 
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { eventsAPI } from "../services/api";
+import {
+  Search,
+  Filter,
+  Calendar,
+  MapPin,
   Users,
   Eye,
   Edit,
   Trash2,
-  Plus
-} from 'lucide-react';
-import { format } from 'date-fns';
-import toast from 'react-hot-toast';
+  Plus,
+} from "lucide-react";
+import { format } from "date-fns";
+import toast from "react-hot-toast";
 
 const Events = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedDate, setSelectedDate] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedDate, setSelectedDate] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
   const categories = [
-    'conference',
-    'workshop',
-    'seminar',
-    'concert',
-    'sports',
-    'exhibition',
-    'meetup',
-    'other'
+    "conference",
+    "workshop",
+    "seminar",
+    "concert",
+    "sports",
+    "exhibition",
+    "meetup",
+    "other",
   ];
 
   useEffect(() => {
@@ -45,39 +45,39 @@ const Events = () => {
       const params = {
         page: currentPage,
         limit: 12,
-        q: searchTerm,
-        category: selectedCategory,
-        date: selectedDate,
+        ...(searchTerm && { q: searchTerm }),
+        ...(selectedCategory && { category: selectedCategory }),
+        ...(selectedDate && { date: selectedDate }),
       };
 
       const response = await eventsAPI.getAll(params);
       setEvents(response.data.events || []);
       setTotalPages(Math.ceil((response.data.total || 0) / 12));
     } catch (error) {
-      console.error('Failed to fetch events:', error);
-      toast.error('Failed to load events');
+      console.error("Failed to fetch events:", error);
+      toast.error("Failed to load events");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteEvent = async (eventId) => {
-    if (window.confirm('Are you sure you want to delete this event?')) {
+    if (window.confirm("Are you sure you want to delete this event?")) {
       try {
         await eventsAPI.delete(eventId);
-        toast.success('Event deleted successfully');
+        toast.success("Event deleted successfully");
         fetchEvents();
       } catch (error) {
-        console.error('Failed to delete event:', error);
-        toast.error('Failed to delete event');
+        console.error("Failed to delete event:", error);
+        toast.error("Failed to delete event");
       }
     }
   };
 
   const clearFilters = () => {
-    setSearchTerm('');
-    setSelectedCategory('');
-    setSelectedDate('');
+    setSearchTerm("");
+    setSelectedCategory("");
+    setSelectedDate("");
     setCurrentPage(1);
   };
 
@@ -145,10 +145,7 @@ const Events = () => {
             />
 
             {/* Clear Filters */}
-            <button
-              onClick={clearFilters}
-              className="btn btn-outline"
-            >
+            <button onClick={clearFilters} className="btn btn-outline">
               Clear Filters
             </button>
           </div>
@@ -160,7 +157,9 @@ const Events = () => {
         <div className="card">
           <div className="card-body text-center py-12">
             <Calendar className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No events found</h3>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">
+              No events found
+            </h3>
             <p className="mt-1 text-sm text-gray-500">
               Try adjusting your search criteria or create a new event.
             </p>
@@ -174,7 +173,10 @@ const Events = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {events.map((event) => (
-            <div key={event.id} className="card hover:shadow-lg transition-shadow">
+            <div
+              key={event.id}
+              className="card hover:shadow-lg transition-shadow"
+            >
               <div className="card-body">
                 <div className="flex justify-between items-start mb-4">
                   <div>
@@ -185,19 +187,22 @@ const Events = () => {
                       {event.description}
                     </p>
                   </div>
-                  <span className={`badge ${
-                    new Date(event.date) > new Date() 
-                      ? 'badge-success' 
-                      : 'badge-warning'
-                  }`}>
-                    {new Date(event.date) > new Date() ? 'Upcoming' : 'Past'}
+                  <span
+                    className={`badge ${
+                      new Date(event.date) > new Date()
+                        ? "badge-success"
+                        : "badge-warning"
+                    }`}
+                  >
+                    {new Date(event.date) > new Date() ? "Upcoming" : "Past"}
                   </span>
                 </div>
 
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center text-sm text-gray-600">
                     <Calendar className="h-4 w-4 mr-2" />
-                    {format(new Date(event.date), 'MMM dd, yyyy')} at {event.time}
+                    {format(new Date(event.date), "MMM dd, yyyy")} at{" "}
+                    {event.time}
                   </div>
                   <div className="flex items-center text-sm text-gray-600">
                     <MapPin className="h-4 w-4 mr-2" />
@@ -254,21 +259,23 @@ const Events = () => {
             >
               Previous
             </button>
-            
+
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
               <button
                 key={page}
                 onClick={() => setCurrentPage(page)}
                 className={`btn ${
-                  currentPage === page ? 'btn-primary' : 'btn-outline'
+                  currentPage === page ? "btn-primary" : "btn-outline"
                 }`}
               >
                 {page}
               </button>
             ))}
-            
+
             <button
-              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              onClick={() =>
+                setCurrentPage(Math.min(totalPages, currentPage + 1))
+              }
               disabled={currentPage === totalPages}
               className="btn btn-outline disabled:opacity-50"
             >
@@ -281,4 +288,4 @@ const Events = () => {
   );
 };
 
-export default Events; 
+export default Events;

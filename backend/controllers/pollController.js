@@ -122,6 +122,7 @@ const getEventPolls = async (req, res) => {
       include: [
         {
           model: User,
+          as: 'creator',
           attributes: ['id', 'name']
         }
       ],
@@ -174,10 +175,12 @@ const getPollById = async (req, res) => {
       include: [
         {
           model: User,
+          as: 'creator',
           attributes: ['id', 'name']
         },
         {
           model: Event,
+          as: 'event',
           attributes: ['id', 'title', 'date']
         }
       ]
@@ -451,10 +454,89 @@ const deletePoll = async (req, res) => {
   }
 };
 
+/**
+ * @swagger
+ * /polls/{id}/results:
+ *   get:
+ *     summary: Get poll results
+ *     tags: [Polls]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Poll ID
+ *     responses:
+ *       200:
+ *         description: Poll results retrieved successfully
+ *       404:
+ *         description: Poll not found
+ */
+const getPollResults = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const poll = await Poll.findByPk(id, {
+      include: [
+        {
+          model: User,
+          as: 'creator',
+          attributes: ['id', 'name']
+        },
+        {
+          model: Event,
+          as: 'event',
+          attributes: ['id', 'title', 'date']
+        }
+      ]
+    });
+
+    if (!poll) {
+      return res.status(404).json({
+        error: 'Poll not found',
+        message: 'The specified poll does not exist'
+      });
+    }
+
+    // Parse options and votes
+    const options = JSON.parse(poll.options || '[]');
+    const votes = JSON.parse(poll.votes || '{}');
+    
+    // Calculate results
+    const results = options.map((option, index) => ({
+      option,
+      votes: votes[index] || 0
+    }));
+
+    const totalVotes = Object.values(votes).reduce((sum, count) => sum + count, 0);
+
+    res.json({
+      message: 'Poll results retrieved successfully',
+      poll: {
+        id: poll.id,
+        question: poll.question,
+        options: results,
+        totalVotes,
+        createdAt: poll.createdAt,
+        creator: poll.creator,
+        event: poll.event
+      }
+    });
+  } catch (error) {
+    console.error('Get poll results error:', error);
+    res.status(500).json({
+      error: 'Failed to retrieve poll results',
+      message: 'An error occurred while retrieving poll results'
+    });
+  }
+};
+
 module.exports = {
   createPoll,
   getEventPolls,
   getPollById,
+  getPollResults,
   voteOnPoll,
   updatePoll,
   deletePoll
