@@ -64,7 +64,7 @@ const validateEventCreation = [
     .withMessage('Please provide a valid date'),
   body('time')
     .optional()
-    .matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
+    .matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
     .withMessage('Please provide a valid time in HH:MM:SS format'),
   body('location')
     .trim()

@@ -202,7 +202,7 @@ const CreateEvent = () => {
                 <input
                   id="time"
                   type="time"
-                  step="60" // <-- only allows hour and minute (each minute = 60 seconds)
+                  // step="60" // <-- only allows hour and minute (each minute = 60 seconds)
                   className="input mt-1"
                   {...register("time", {
                     required: "Time is required",

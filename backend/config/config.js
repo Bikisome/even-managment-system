@@ -5,7 +5,7 @@ module.exports = {
   host: 'localhost',
   port: 3306,
   username: 'root', 
-  password: '#Nishu@0523',
+  password: 'Bikram@2021', // Updated password
   database: 'event_management_dev',
   logging: false,
 }; 
